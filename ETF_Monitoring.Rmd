@@ -1,0 +1,414 @@
+---
+title: "Global ETF Monitoring"
+author: "QAE_Student_Dominusmaximus"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo = FALSE, message=FALSE, warning=FALSE}
+rm(list = ls())
+options(scipen = 10)
+
+library(dplyr)
+library(openxlsx)
+library(tidyquant)
+library(tidyverse)
+library(stringr)
+library(lubridate)
+library(htmlwidgets)
+library(sparkline)
+library(DT)
+library(quantmod)
+
+source("ETF_MONIT.R")
+
+end.date <- Sys.Date()
+
+raw.aa.data <- read.xlsx("ETF_LIST.xlsx", sheet = 1) %>% as.tibble()
+raw.etf.profile <- readRDS("ETF_PROFILE.rds")
+```
+
+***
+
+# Key Markets
+
+***
+
+```{r key_markets, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "key_market") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile, 
+              end.date = end.date)
+```
+
+***
+
+## 1. Equity
+
+***
+
+### 1.1 Regional ETFs
+
+```{r eq_regional, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "equity_region") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+### 1.1.1 Developed Markets ETFs
+
+```{r eq_developed, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "equity_country", class_2 == "MSCI Developed Markets") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+### 1.1.2 Emerging Markets ETFs
+
+```{r eq_emerging, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "equity_country", class_2 != "MSCI Developed Markets") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+### 1.2 U.S. Markets ETFs
+
+#### 1.2.1 U.S. Summary
+
+```{r eq_us_sum, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- c("SPY","DIA","IWM","QQQ")
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+#### 1.2.2 S&P Indexes
+
+```{r eq_sp, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "equity_us", class_2 == "SP") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+#### 1.2.3 Russell Indexes
+```{r eq_russell, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "equity_us", class_2 == "RUSSELL") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+#### 1.2.4 NASDAQ Indexes
+```{r eq_nasdaq, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "equity_us", class_2 == "NASDAQ") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+### 1.3 Sector ETFs
+
+#### 1.3.1 Global Sector ETFs
+```{r eq_sector_global, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "equity_sector", class_2 == "global") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+#### 1.3.2 U.S. Sector ETFs
+```{r eq_sector_us, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "equity_sector", class_2 == "SPDR") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+#### 1.3.3 Themes & SubSectors ETFs
+
+#### 1.3.3.1 Energy & Alternative Energy
+
+```{r eq_sector_sub_Energy, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "equity_subsector", 
+         class_2 %in% c("Energy","Alternative Energy")) %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+#### 1.3.3.2 Material, Metals and Mining
+
+```{r eq_sector_sub_Material, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "equity_subsector", 
+         class_2 == "Material, Metals and Mining") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+#### 1.3.3.3 Industrial & Infrastructure
+
+```{r eq_sector_sub_Industrial, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "equity_subsector", 
+         class_2 == "Industrial & Infrastructure") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+#### 1.3.3.4 Consumer
+
+```{r eq_sector_sub_Consumer, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "equity_subsector", 
+         class_2 == "Consumer") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+#### 1.3.3.5 Healthcare
+
+```{r eq_sector_sub_Healthcare, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "equity_subsector", 
+         class_2 == "Healthcare") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+#### 1.3.3.6 Financial
+
+```{r eq_sector_sub_Financial, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "equity_subsector", 
+         class_2 == "Financial") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+#### 1.3.3.7 Technology
+
+```{r eq_sector_sub_Technology, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "equity_subsector", 
+         class_2 == "Technology") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile,
+              end.date = end.date)
+```
+
+***
+
+## 2. Bond
+
+***
+
+```{r bond, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "bond") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile, 
+              end.date = end.date,
+              bond.opt = T)
+```
+
+***
+
+## 3. Commodity
+
+***
+
+#### 3.1 Precious Metals
+
+```{r commodity, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "comm2", class_2 == "Precious Metals") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile, 
+              end.date = end.date,
+              commo.opt = T)
+```
+
+#### 3.2 Energy
+
+```{r commodity_energy, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "comm2", class_2 == "Energy") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile, 
+              end.date = end.date,
+              commo.opt = T)
+```
+
+#### 3.3 Agricultural Commodities
+
+```{r commodity_ac, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "comm2", class_2 == "Agricultural Commodities") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile, 
+              end.date = end.date,
+              commo.opt = T)
+```
+
+#### 3.4 Industrial Commodities
+
+```{r commodity_ind_comm, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "comm2", class_2 == "Industrial Commodities") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile, 
+              end.date = end.date,
+              commo.opt = T)
+```
+
+#### 3.5 Commodity Basket
+
+```{r commodity_basket, echo = FALSE, message=FALSE, warning=FALSE}
+aa.etf.ticker <- raw.aa.data %>% 
+  filter(class_1 == "comm2", class_2 == "Commodity Basket") %>%
+  select(symbol) %>% pull
+
+etf.profile <- raw.etf.profile %>% 
+  unnest() %>% filter(TICKER %in% aa.etf.ticker)
+
+aa.monit.func(aa.etf.ticker = aa.etf.ticker, 
+              etf.profile = etf.profile, 
+              end.date = end.date,
+              commo.opt = T)
+```
+
